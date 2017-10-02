@@ -17,7 +17,6 @@ var omdbKey = keys.omdbKey;
 // make able to take in following commands:
 var action = process.argv[2];
 var value = process.argv[3];
-var queryUrl = "";
 
 
 // use a switch case to know which function to run
@@ -129,51 +128,68 @@ switch (action) {
 		// node package: [Request](https://www.npmjs.com/package/request)
 
 function movieThis(omdbKey, value){
-	queryUrl =  "http://www.omdbapi.com/?t=" + value + "&y=&plot=short&apikey=" + omdbKey;
+	var searchQueryUrl = "http://www.omdbapi.com/?s=" + value + "&y=&plot=short&apikey=" + omdbKey;
+	var titleQueryUrl = "http://www.omdbapi.com/?i=" + imdbID + "&y=&plot=short&tomatoes=true&apikey=" + omdbKey;
 
-	Request(queryUrl, function(error, response, body) {
-		
+	Request(searchQueryUrl, function(error, response, body) { // begin request for list of imdbIDs
+
+
 		// If the request is successful
 		if (!error && response.statusCode === 200) {
 			
 		// output the following info
 		// console.log(JSON.parse(body));
 
-			// Title of the movie
-			console.log("\nTitle: " + JSON.parse(body).Title);
-
-			// Year movie came out
-			console.log("Year: " + JSON.parse(body).Year);
-
-			// IMDB Rating of the movie
-			console.log("IMDB Rating: " + JSON.parse(body).imdbRating);
-
-			// Rotton Tomates Rating of the movie
-			JSON.parse(body).Ratings.forEach(function(property){
-				if (property.Source === "Rotten Tomatoes"){
-					console.log("Rotton Tomatoes Rating: " + property.Value);
-				}
-			}); // close rotten tomates forEach loop
-
-			// Country where movie was produced
-			console.log("Produced: " + JSON.parse(body).Country);
-
-			// Language of the movie
-			console.log("Language: " + JSON.parse(body).Language);
-
-			// plot of the movie
-			console.log("Plot: " + JSON.parse(body).Plot);
-
-			// actors of the movie
-			console.log("Actors: " + JSON.parse(body).Actors);
+	
 
 		} else {
 			console.log(queryUrl);
 			console.log(error);
-		} // close if statement
+		} // close if/else statement
 
 	}); // end request function
 		
+
+	Request(titleQueryUrl, function(error, response, body) {
+
+			// If the request is successful
+			if (!error && response.statusCode === 200) {
+			
+				JSON.parse(body).imdbID.forEach(imdbID, function(){
+
+					// Title of the movie
+					console.log("\nTitle: " + property.Title);
+
+					// Year movie came out
+					console.log("Year: " + property.Year);
+
+					// IMDB Rating of the movie
+					console.log("IMDB Rating: " + property.imdbRating);
+
+					/* Rotton Tomates Rating of the movie
+					JSON.parse(body).Ratings.forEach(function(property){
+						if (property.Source === "Rotten Tomatoes"){
+							console.log("Rotton Tomatoes Rating: " + property.Value);
+						}
+					});  close rotten tomates forEach loop */
+
+					// Country where movie was produced
+					console.log("Produced: " + property.Country);
+
+					// Language of the movie
+					console.log("Language: " + property.Language);
+
+					// plot of the movie
+					console.log("Plot: " + property.Plot);
+
+					// actors of the movie
+					console.log("Actors: " + property.Actors);
+
+				}); // close forEach loop
+			} else {
+				console.log(error
+
+			}; // close if/else statement
 } // end function movie-this
 
 
