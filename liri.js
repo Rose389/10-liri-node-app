@@ -1,11 +1,12 @@
-// code to retrieve data from keys.js
+// node packages loaded
 var fs = require("fs");
 var Twitter = require("twitter");
 var Spotify = require("node-spotify-api");
 var Request = require("request");
 
-// store keys in a variable
+// code to retrieve data from keys.js
 var keys = require("./keys.js");
+// store keys in a variable
 var twitterKeys = keys.twitterKeys;
 var spotifyKeys = {
 	ID: keys.spotifyID,
@@ -37,6 +38,51 @@ switch (action) {
     doWhatItSays();
     break;
 }
+
+
+
+function printInfo(body){
+
+	if (action === "movie-this") {
+		// Title of the movie
+		console.log("\n\nTitle: " + "\n   " + JSON.parse(body).Title);
+		// Year movie came out
+		console.log("\nYear: " +  "\n   " + JSON.parse(body).Year);
+		// IMDB Rating of the movie
+		console.log("\nRatings: " + "\n   IMDB: " + JSON.parse(body).imdbRating);
+		// Rotton Tomates Rating of the movie
+		JSON.parse(body).Ratings.forEach(function(property){
+			if (property.Source === "Rotten Tomatoes"){
+				console.log("   Rotten Tomatoes: " + property.Value);
+			}
+		}); 
+		// Country where movie was produced
+		console.log("\nProduced: " +  "\n   " + JSON.parse(body).Country);
+		// Language of the movie
+		console.log("\nLanguage: " +  "\n   " + JSON.parse(body).Language);
+		// plot of the movie
+		console.log("\nPlot: " +  "\n   " + JSON.parse(body).Plot);
+		// actors of the movie
+		console.log("\nActors: " +  "\n   " + JSON.parse(body).Actors);
+	}
+
+	else if (action === "spotify-this-song" || "do-what-it-says") {
+		
+		for(var i = 0; i < body.tracks.items.length; i++) {
+		    for (var a = 0; a < body.tracks.items[i].artists.length; a++){
+		 		// Artist(s) name(s)
+		 		console.log("\nArtist(s) Name: " +   "\n   " + body.tracks.items[i].artists[a].name);
+		 	}
+			// Song name
+		    console.log("Song Name: " +   "\n   " + body.tracks.items[i].name);
+			// preview link of the song from spotify
+		    console.log("Preview Link: " +   "\n   " + body.tracks.items[i].preview_url);
+			// the album the song is from 
+		    console.log("Album Name: " +   "\n   " + body.tracks.items[i].album.name);
+		}
+
+	}
+} // end printInfo()
 
 	// my tweets: `node liri.js my-tweets`
 		// node package loaded: twitter
@@ -79,37 +125,12 @@ switch (action) {
 		  secret: spotifyKeys.Secret
 		});
 		 
-		spotify.search({ type: 'track', query: value }, function(err, data) {
-		
-		 
-//		console.log(data.tracks.items); 
+		spotify.search({ type: 'track', query: value, limit: 3}, function(err, data) {
+			
 
-		// This will show the following info about the song:
-			// Artist(s)
-			for (var i = 0; i < data.tracks.items.length; i++) {
-				if (err) {
-		    return console.log('Error occurred: ' + err);
-		  } else {
-			JSON.parse([i]).forEach(function(property){
-				if (!isEmpty(property.artists)){
-					console.log("\nArtist Name: " + property.artists);
-				}
-			});
-		}
-			} // end for loop
-
-
-			// Song name
-				
-			    //console.log("Song Name: " + [i].name);
-
-			// preview link of the song from spotify
-		
-			    //console.log("Preview Link: " + [i].preview_url);
-
-			// the album the song is from
 	
-			    //console.log("Album Name: " + [i].album);
+				var body = data;
+				printInfo(body);
 
 			
 		}); // end search fuction
@@ -129,52 +150,50 @@ switch (action) {
 		// node package: [Request](https://www.npmjs.com/package/request)
 
 function movieThis(omdbKey, value){
+
 	queryUrl =  "http://www.omdbapi.com/?t=" + value + "&y=&plot=short&apikey=" + omdbKey;
 
-	Request(queryUrl, function(error, response, body) {
-		
-		// If the request is successful
-		if (!error && response.statusCode === 200) {
+	if (process.argv.length === 3) {
+
+		queryUrl =  "http://www.omdbapi.com/?t=mr+nobody&y=&plot=short&apikey=" + omdbKey;
+
+		Request(queryUrl, function(error, response, body) {
 			
-		// output the following info
-		// console.log(JSON.parse(body));
+			// If the request is successful
+			if (!error && response.statusCode === 200) {
+				
+			// output the following info
+			printInfo(body);
 
-			// Title of the movie
-			console.log("\nTitle: " + JSON.parse(body).Title);
+			} else {
+				console.log(queryUrl);
+				console.log(error);
+			} // close if statement for request
 
-			// Year movie came out
-			console.log("Year: " + JSON.parse(body).Year);
+		}); // end request function default
 
-			// IMDB Rating of the movie
-			console.log("IMDB Rating: " + JSON.parse(body).imdbRating);
+	} else {
 
-			// Rotton Tomates Rating of the movie
-			JSON.parse(body).Ratings.forEach(function(property){
-				if (property.Source === "Rotten Tomatoes"){
-					console.log("Rotton Tomatoes Rating: " + property.Value);
-				}
-			}); // close rotten tomates forEach loop
+		Request(queryUrl, function(error, response, body) {
+			
+			// If the request is successful
+			if (!error && response.statusCode === 200) {
+				
+			// output the following info
+			// console.log(JSON.parse(body));
+			printInfo(body);
+				
 
-			// Country where movie was produced
-			console.log("Produced: " + JSON.parse(body).Country);
+			} else {
+				console.log(queryUrl);
+				console.log(error);
+			} // close if statement for request
 
-			// Language of the movie
-			console.log("Language: " + JSON.parse(body).Language);
-
-			// plot of the movie
-			console.log("Plot: " + JSON.parse(body).Plot);
-
-			// actors of the movie
-			console.log("Actors: " + JSON.parse(body).Actors);
-
-		} else {
-			console.log(queryUrl);
-			console.log(error);
-		} // close if statement
-
-	}); // end request function
+		}); // end request function search
+	
+	} // close if statement
 		
-} // end function movie-this
+}; // end function movie-this
 
 
 		/* If the user doesn't type a movie in, 
@@ -197,7 +216,9 @@ function doWhatItSays(){
 			// call one of liri's commands
 				/* It should run 'spotify-this-song' for "I Want it That Way"
 					text can be changed to test out other commands. */
+			value = "i want it that way";
 
+			spotifyThisSong(spotifyKeys, value);
 
 		});
 
@@ -206,10 +227,23 @@ function doWhatItSays(){
 
 // BONUS
 	// output data to a file called log.txt
-
 	// append each command to log.txt
-
 	// DO NOT overwrite data with successive commands
+
+fs.appendFile("log.txt", printInfo(body), function(err) {
+
+  // If an error was experienced we say it.
+  if (err) {
+    console.log(err);
+  }
+
+  // If no error is experienced, we'll log the phrase "the following content was added" to our node console.
+  else {
+    console.log("Content Added!");
+  }
+
+});
+
 
 
 
