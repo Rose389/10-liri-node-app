@@ -71,23 +71,19 @@ function printInfo(body){
 		
 		for(var i = 0; i < body.tracks.items.length; i++) {
 			// Get Artist(s) name(s)
-			var nameArr = "";
 		    for (var a = 0; a < body.tracks.items[i].artists.length; a++){
-		    	var nameArr = nameArr + body.tracks.items[i].artists[a].name + ". " ;
+		 		// Default Artist(s) name(s)
+		 		console.log("\nArtist(s) Name: " +   "\n   " + body.tracks.items[i].artists[a].name);
 		 	}
-		 	// print Artist(s) name(s)
-		 	console.log("\nArtist(s) Name(s): " +   "\n   " + nameArr); 
-			// print Song name
+			// Song name
 		    console.log("Song Name: " +   "\n   " + body.tracks.items[i].name);
-			// print preview link of the song from spotify
+			// preview link of the song from spotify
 		    console.log("Preview Link: " +   "\n   " + body.tracks.items[i].preview_url);
-			// print the album the song is from 
+			// the album the song is from 
 		    console.log("Album Name: " +   "\n   " + body.tracks.items[i].album.name);
+		}
 
-		} // end for loop
-
-	} // end else if statement
-
+	}
 } // end printInfo()
 
 	// my tweets: `node liri.js my-tweets`
@@ -95,57 +91,32 @@ function printInfo(body){
 		// show the last 20 tweets and when they were created
 	function myTweets(twitterKeys){
 		var client = new Twitter(twitterKeys);
-		var params = {
-			screen_name: 'ProjectDemo4',
-			sort_by: 'created_at-desc',
-			count: 3
-		};
-
+		var params = {screen_name: 'ProjectDemo4'};
 
 		client.get('statuses/user_timeline', params, function(error, tweets, response) {
 
-
-
-			if (!error) {
-
-				fs.appendFile("log.txt", "NEW REQUEST:", function (err, data){
-					if (err) {
-						return console.log(err);
-					}
-					console.log("\n---------\n" + data);
-				});
-			
 			var x = tweets.length;
 
+			if (!error) {
 				tweets.forEach(function(tweet){
+				x = x - 1;
 
-					fs.appendFile("log.txt", "", function (err, data){
+					if(x === 0){
+						console.log("\nMy first Tweet!");
+					} 
+					else if (x < 20){
+						console.log("\nTweet " + parseFloat(x + 1));
+					};
 
-					x = x - 1;
-						if (err) {
-							return console.log(err);
-						}
-						if(x === 0){
-							console.log("\nMy first Tweet!");
-						} 
-							else if (x < 20){
-								console.log("\nTweet " + parseFloat(x + 1));
-							};
-						console.log(tweet.created_at);
-						console.log(tweet.text);
+				console.log(tweet.created_at);
+				console.log(tweet.text);
+				})
 
-					}); // end write to file function
-
-				}); // end tweets.forEach
-
-			} 
-			else {
+			} else {
 				console.log(error);
-			} // end if / else statement
-
-		}); // end get request
-
-	}; // end myTweets()
+			  }
+		});
+	}
 
 	// spotify-this-song:  `node liri.js spotify-this-song '<song name here>'`
 		// Node package loaded: node-spotify-api
@@ -159,7 +130,7 @@ function printInfo(body){
 		// If no song is provided 
 		// then your program will default to 
 		// "The Sign" by Ace of Base.
-		if (process.argv.length === 3 || dataArr.length === 1) {
+		if (process.argv.length === 3) {
 
 		spotify.search({ type: 'track', query: "the sign ace of base", limit: 1}, function(err, data) {
 				
@@ -250,42 +221,18 @@ function doWhatItSays(){
 			return console.log(error);
 			}
 
-			console.log("Contents of random.txt file: " + data);
-			var dataArr = data.split(",");
-			console.log("Length of the array created by data.split(): " + dataArr.length);
 
 			// call one of liri's commands
 				/* It should run 'spotify-this-song' for "I Want it That Way"
 					text can be changed to test out other commands. */
-			action = dataArr[0];
-			value = dataArr[1];
+			value = "i want it that way";
 
-			console.log("\nAction for switch case: " + action);
-			console.log("Value for function: " + value);
-
-			// use a switch case to know which function to run
-			console.log("\nSwitch case code is here.");
-switch (action) {
-  case "my-tweets":
-    myTweets(twitterKeys);
-    break;
-
-  case "spotify-this-song":
-    spotifyThisSong(spotifyKeys, value);
-    break;
-    
-  case "movie-this":
-    movieThis(omdbKey, value);
-    break;
-}
-
-			console.log("\nFunction called by switch case should have run by now. ")
+			spotifyThisSong(spotifyKeys, value);
 
 		});
 
 
-
-};
+}
 /*
 // BONUS
 	// output data to a file called log.txt
@@ -306,36 +253,56 @@ fs.appendFile("log.txt", printInfo(body), function(err) {
 
 });
 */
+function parsing(body){
+	this.body = body;
+	this.result = JSON.parse(body);
+}
 
+function Movie(body){
+	
+	this.title = title;
+	this.year = year;
+	this.imdb = imdb;
+	this.tomatoes = function(){
+		JSON.parse(body).Ratings.forEach(function(property){
+			if (property.Source === "Rotten Tomatoes"){
+				console.log("   Rotten Tomatoes: " + property.Value);
+			} 
+		}); 
+	};
+	this.country = country;
+	this.language = language;
+	this.plot = plot;
+	this.actors = actors;
+	this.printResults = function(){
+		// Title of the movie
+		console.log("\n\nTitle: " + "\n   " + JSON.parse(body).Title);
+		// Year movie came out
+		console.log("\nYear: " +  "\n   " + JSON.parse(body).Year);
+		// IMDB Rating of the movie
+		console.log("\nRatings: " + "\n   IMDB: " + JSON.parse(body).imdbRating);
+		// Rotton Tomates Rating of the movie
+		console.log(this.tomatoes);
+		// Country where movie was produced
+		console.log("\nProduced: " +  "\n   " + JSON.parse(body).Country);
+		// Language of the movie
+		console.log("\nLanguage: " +  "\n   " + JSON.parse(body).Language);
+		// plot of the movie
+		console.log("\nPlot: " +  "\n   " + JSON.parse(body).Plot);
+		// actors of the movie
+		console.log("\nActors: " +  "\n   " + JSON.parse(body).Actors);
+	};
+	this.logResults = function(){
+		console.log("You haven't beat me yet!")
+	};
+	this.attack = function(){
 
+	};
+	this.levelUp = function(){
 
-/* Example return from spotify 
+	};
+};
 
-[{ album:
-     { album_type: 'album',
-       artists: [Array],
-       available_markets: [Array],
-       external_urls: [Object],
-       href: 'https://api.spotify.com/v1/albums/0m7GzodmVBjFbLdzgHtBet',
-       id: '0m7GzodmVBjFbLdzgHtBet',
-       images: [Array],
-       name: 'Comatised',
-       type: 'album',
-       uri: 'spotify:album:0m7GzodmVBjFbLdzgHtBet' },
-    artists: [ [Object] ],
-    available_markets: [ 'CA', 'US' ],
-    disc_number: 1,
-    duration_ms: 242266,
-    explicit: false,
-    external_ids: { isrc: 'USMC19989334' },
-    external_urls: { spotify: 'https://open.spotify.com/track/7HXeIPrNFNJOZZdRjsMKWT' },
-    href: 'https://api.spotify.com/v1/tracks/7HXeIPrNFNJOZZdRjsMKWT',
-    id: '7HXeIPrNFNJOZZdRjsMKWT',
-    name: 'Northern Star',
-    popularity: 4,
-    preview_url: null,
-    track_number: 9,
-    type: 'track',
-    uri: 'spotify:track:7HXeIPrNFNJOZZdRjsMKWT' } ]
+var print = new Movie(body);
 
-    */
+print.printResults();

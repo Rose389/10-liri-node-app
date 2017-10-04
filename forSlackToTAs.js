@@ -1,121 +1,67 @@
 // File for slacking code to the TA's
 
 
+// working on the bonus to log output in external file.
+// I started with my-tweets because it doesn't call my printInfo function, making it easier to test.
 
+// issue one - getting the "new request" fs to print first, 
+//	also it shows as undefined in the console, but not in log.txt
 
-// My code.  A little chopped up, but can you check it for me?  The response I got is beneath the code.
-// I did get my external API references working, but I included them here for your convenience. :-)
-//
+/* issue two - the forEach fs shows in the console, but not in the log.txt instead I get the following:
 
-// npm's
-var fs = require("fs");
-var Twitter = require("twitter");
-var Spotify = require("node-spotify-api");
-var Request = require("request");
-
-// vars
-var action = process.argv[2];
-var value = process.argv[3];
-var spotifyKeys ={
-	ID: "d419c7f0be554a65b021bd015491b439",
-	tSecret: "5f0cb65335594095ba2ea24315b35da6"
-};
-
-// switch-case
-switch (action) {
-  case "my-tweets":
-    myTweets(twitterKeys);
-    break;
-
-  case "spotify-this-song":
-    spotifyThisSong(spotifyKeys, value);
-    break
-  case "movie-this":
-    movieThis(omdbKey, value);
-    break;
-
-  case "do-what-it-says":
-    doWhatItSays();
-    break;
-}
-
-// the spotify function
-	function spotifyThisSong(spotifyKeys, value){
-		var spotify = new Spotify({
-		  id: spotifyKeys.ID,
-		  secret: spotifyKeys.Secret
-		});
-		 
-		spotify.search({ type: 'track', query: value }, function(err, data) {
-		  if (err) {
-		    return console.log('Error occurred: ' + err);
-		  }
-		 
-		console.log(data); 
-	};
-
-
-
-
-
-
-/* The response I recieved when I ran the file, once with a really well known title, and once with a unique title.
-
-WELL-KNOWN
-seife@DESKTOP-AN209U2 MINGW64 /d/bootcamp/10-liri-node-app (master)
-$ node liri.js spotify-this-song Breathe
-The file keys.js is loaded.
-{ tracks:
-   { href: 'https://api.spotify.com/v1/search?query=Breathe&type=track&offset=0&limit=20',
-     items:
-      [ [Object],
-        [Object],
-        [Object],
-        [Object],
-        [Object],
-        [Object],
-        [Object],
-        [Object],
-        [Object],
-        [Object],
-        [Object],
-        [Object],
-        [Object],
-        [Object],
-        [Object],
-        [Object],
-        [Object],
-        [Object],
-        [Object],
-        [Object] ],
-     limit: 20,
-     next: 'https://api.spotify.com/v1/search?query=Breathe&type=track&offset=20&limit=20',
-     offset: 0,
-     previous: null,
-     total: 34039 } }
-
-UNIQUE
-seife@DESKTOP-AN209U2 MINGW64 /d/bootcamp/10-liri-node-app (master)
-$ node liri.js spotify-this-song comatised
-The file keys.js is loaded.
-{ tracks:
-   { href: 'https://api.spotify.com/v1/search?query=comatised&type=track&offset=0&limit=20',
-     items:
-      [ [Object],
-        [Object],
-        [Object],
-        [Object],
-        [Object],
-        [Object],
-        [Object],
-        [Object],
-        [Object],
-        [Object],
-        [Object],
-        [Object] ],
-     limit: 20,
-     next: null,
-     offset: 0,
-     previous: null,
-     total: 12 } }
+NEW REQUEST:NEW REQUEST:NEW REQUEST:NEW REQUEST:NEW REQUEST:NEW REQUEST:NEW REQUEST:NEW REQUEST:NEW REQUEST:NEW REQUEST:NEW REQUEST:NEW REQUEST:[object Object][object Object][object Object][object Object][object Object][object Object]NEW REQUEST:243051NEW REQUEST:3451025NEW REQUEST:431024NEW REQUEST:5321066NEW REQUEST:6666NEW REQUEST:NEW REQUEST:NEW REQUEST:NEW REQUEST:NEW REQUEST:
 */
+
+function myTweets(twitterKeys){
+		var client = new Twitter(twitterKeys);
+		var params = {
+			screen_name: 'ProjectDemo4',
+			sort_by: 'created_at-desc',
+			count: 20
+		};
+
+
+		client.get('statuses/user_timeline', params, function(error, tweets, response) {
+
+
+
+			if (!error) {
+
+				fs.appendFile("log.txt", "NEW REQUEST:", function (err, data){
+					if (err) {
+						return console.log(err);
+					}
+					console.log("\n---------\n" + data);
+				});
+			
+			var x = tweets.length;
+
+				tweets.forEach(function(tweet){
+
+					fs.appendFile("log.txt", "", function (err, data){
+
+					x = x - 1;
+						if (err) {
+							return console.log(err);
+						}
+						if(x === 0){
+							console.log("\nMy first Tweet!");
+						} 
+							else if (x < 20){
+								console.log("\nTweet " + parseFloat(x + 1));
+							};
+						console.log(tweet.created_at);
+						console.log(tweet.text);
+
+					}); // end write to file function
+
+				}); // end tweets.forEach
+
+			} 
+			else {
+				console.log(error);
+			} // end if / else statement
+
+		}); // end get request
+
+	}; // end myTweets()
