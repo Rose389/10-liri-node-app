@@ -29,7 +29,8 @@ switch (action) {
 
   case "spotify-this-song":
     spotifyThisSong(spotifyKeys, value);
-    break
+    break;
+    
   case "movie-this":
     movieThis(omdbKey, value);
     break;
@@ -124,24 +125,32 @@ function printInfo(body){
 		  id: spotifyKeys.ID,
 		  secret: spotifyKeys.Secret
 		});
-		 
-		spotify.search({ type: 'track', query: value, limit: 3}, function(err, data) {
-			
 
-	
-				var body = data;
-				printInfo(body);
-
-			
-		}); // end search fuction
 		// If no song is provided 
 		// then your program will default to 
 		// "The Sign" by Ace of Base.
+		if (process.argv.length === 3) {
 
+		spotify.search({ type: 'track', query: value, limit: 3}, function(err, data) {
+				
+				value = "the sign";
+				var body = data;
+				printInfo(body);
 
+		}); // end default request 
 
+	} else {
 
-	} // end of function spotify-this-song
+		spotify.search({ type: 'track', query: value, limit: 3}, function(err, data) {
+			
+				var body = data;
+				printInfo(body);
+
+		}); // end user input request
+
+	  }
+
+	} // end function spotify-this-song
 
 
 
@@ -224,7 +233,7 @@ function doWhatItSays(){
 
 
 }
-
+/*
 // BONUS
 	// output data to a file called log.txt
 	// append each command to log.txt
@@ -237,13 +246,13 @@ fs.appendFile("log.txt", printInfo(body), function(err) {
     console.log(err);
   }
 
-  // If no error is experienced, we'll log the phrase "the following content was added" to our node console.
+  // If no error is experienced, we'll log the phrase "the following content was added=" to our node console.
   else {
     console.log("Content Added!");
   }
 
 });
-
+*/
 
 
 
