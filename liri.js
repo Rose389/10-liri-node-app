@@ -70,8 +70,9 @@ function printInfo(body){
 	else if (action === "spotify-this-song" || "do-what-it-says") {
 		
 		for(var i = 0; i < body.tracks.items.length; i++) {
+			// Get Artist(s) name(s)
 		    for (var a = 0; a < body.tracks.items[i].artists.length; a++){
-		 		// Artist(s) name(s)
+		 		// Default Artist(s) name(s)
 		 		console.log("\nArtist(s) Name: " +   "\n   " + body.tracks.items[i].artists[a].name);
 		 	}
 			// Song name
@@ -131,9 +132,8 @@ function printInfo(body){
 		// "The Sign" by Ace of Base.
 		if (process.argv.length === 3) {
 
-		spotify.search({ type: 'track', query: value, limit: 3}, function(err, data) {
+		spotify.search({ type: 'track', query: "the sign ace of base", limit: 1}, function(err, data) {
 				
-				value = "the sign";
 				var body = data;
 				printInfo(body);
 
