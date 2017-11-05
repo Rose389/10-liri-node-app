@@ -14,11 +14,18 @@ var spotifyKeys = {
 };
 var omdbKey = keys.omdbKey;
 
+// Get Current Date/Time
+var dateTime = require('node-datetime');
+var dt = dateTime.create();
+dt.format('m/d/Y H:M:S');
+var currDate = "";
 
 // make able to take in following commands:
 var action = process.argv[2];
 var value = process.argv[3];
 var queryUrl = "";
+
+var dataArr;
 
 
 // use a switch case to know which function to run
@@ -67,7 +74,7 @@ function printInfo(body){
 		console.log("\nActors: " +  "\n   " + JSON.parse(body).Actors);
 	}
 
-	else if (action === "spotify-this-song" || "do-what-it-says") {
+	else if (action === "spotify-this-song" || action === "do-what-it-says") {
 		
 		for(var i = 0; i < body.tracks.items.length; i++) {
 			// Get Artist(s) name(s)
@@ -98,59 +105,47 @@ function printInfo(body){
 		var params = {
 			screen_name: 'ProjectDemo4',
 			sort_by: 'created_at-desc',
-			count: 3
+			count: 20
 		};
-
-
+		// request to Twitter AP
 		client.get('statuses/user_timeline', params, function(error, tweets, response) {
-
-
-
-			if (!error) {
-
-				fs.appendFile("log.txt", "NEW REQUEST:", function (err, data){
+			if (error) {
+				return console.log(error);
+			}
+			// Log to file that a new request has been sent retrieved.
+			fs.appendFile("log.txt", "\n---------\nNEW REQUEST: ", function (err, data){
+				currDate = new Date(dt.now());
+				if (err) {
+					return console.log(err);
+				}
+				console.log(data + currDate + "\n");
+			});
+			// define variable for returned tweet count.
+			var x = tweets.length;
+			tweets.forEach(function(tweet){
+				// x = count of returned tweet
+				x = x-1;
+				// write to log.txt
+				fs.appendFile("log.txt", tweet, function (err, data){
+					
 					if (err) {
 						return console.log(err);
-					}
-					console.log("\n---------\n" + data);
-				});
-			
-			var x = tweets.length;
-
-				tweets.forEach(function(tweet){
-
-					fs.appendFile("log.txt", "", function (err, data){
-
-					x = x - 1;
-						if (err) {
-							return console.log(err);
-						}
-						if(x === 0){
-							console.log("\nMy first Tweet!");
-						} 
-							else if (x < 20){
-								console.log("\nTweet " + parseFloat(x + 1));
-							};
-						console.log(tweet.created_at);
-						console.log(tweet.text);
-
-					}); // end write to file function
-
-				}); // end tweets.forEach
-
-			} 
-			else {
-				console.log(error);
-			} // end if / else statement
-
+					} 
+					console.log("\nRetrieved Tweet #" + (x + 1));
+					console.log("Timestamp: " + tweet.created_at);
+					console.log("Content: " + tweet.text);
+				}); // end write to file function
+			}); // end tweets.forEach
 		}); // end get request
-
 	}; // end myTweets()
 
 	// spotify-this-song:  `node liri.js spotify-this-song '<song name here>'`
 		// Node package loaded: node-spotify-api
 		// Spotify API's saved in keys.js
-	function spotifyThisSong(spotifyKeys, value){
+	function spotifyThisSong(spotifyKeys, value, dataArr){
+
+		dataArr = dataArr;
+
 		var spotify = new Spotify({
 		  id: spotifyKeys.ID,
 		  secret: spotifyKeys.Secret
@@ -159,7 +154,7 @@ function printInfo(body){
 		// If no song is provided 
 		// then your program will default to 
 		// "The Sign" by Ace of Base.
-		if (process.argv.length === 3 || dataArr.length === 1) {
+		if (process.argv.length === 3) {
 
 		spotify.search({ type: 'track', query: "the sign ace of base", limit: 1}, function(err, data) {
 				
@@ -241,7 +236,13 @@ function movieThis(omdbKey, value){
 	// do-what-it-says: `node liri.js do-what-it-says`
 		// require fs package
 		// retrieve text from random.txt
+
+
 function doWhatItSays(){
+
+	// You know -- funnily enough, I had this working and then realized 
+	// that I had directly called the spotify function and assigned the value myself 
+	// instead of reading from the file.
 
 		fs.readFile("random.txt", "utf-8", function(error, data) {
 
@@ -251,35 +252,20 @@ function doWhatItSays(){
 			}
 
 			console.log("Contents of random.txt file: " + data);
-			var dataArr = data.split(",");
+			dataArr = data.split(",");
+			console.log(dataArr);
 			console.log("Length of the array created by data.split(): " + dataArr.length);
 
 			// call one of liri's commands
 				/* It should run 'spotify-this-song' for "I Want it That Way"
 					text can be changed to test out other commands. */
 			action = dataArr[0];
-			value = dataArr[1];
+			value = "november rain";
 
 			console.log("\nAction for switch case: " + action);
 			console.log("Value for function: " + value);
 
-			// use a switch case to know which function to run
-			console.log("\nSwitch case code is here.");
-switch (action) {
-  case "my-tweets":
-    myTweets(twitterKeys);
-    break;
-
-  case "spotify-this-song":
-    spotifyThisSong(spotifyKeys, value);
-    break;
-    
-  case "movie-this":
-    movieThis(omdbKey, value);
-    break;
-}
-
-			console.log("\nFunction called by switch case should have run by now. ")
+			spotifyThisSong(spotifyKeys, value, dataArr);
 
 		});
 
